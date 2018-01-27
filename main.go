@@ -11,14 +11,11 @@ import (
 
 // Payload Type is for ...
 type Payload struct {
-	Parse       string `json:"parse,omitempty"`
-	Username    string `json:"username,omitempty"`
-	IconURL     string `json:"icon_url,omitempty"`
-	IconEmoji   string `json:"icon_emoji,omitempty"`
-	Channel     string `json:"channel,omitempty"`
-	Text        string `json:"text,omitempty"`
-	UnfurlLinks bool   `json:"unfurl_links,omitempty"`
-	UnfurlMedia bool   `json:"unfurl_media,omitempty"`
+	Parse     string `json:"parse,omitempty"`
+	Username  string `json:"username,omitempty"`
+	IconEmoji string `json:"icon_emoji,omitempty"`
+	Channel   string `json:"channel,omitempty"`
+	Text      string `json:"text,omitempty"`
 }
 
 func redirectPolicyFunc(req gorequest.Request, via []gorequest.Request) error {
@@ -65,7 +62,6 @@ func main() {
 		if err != nil {
 			fmt.Println("key not found")
 		}
-		// fmt.Println(message)
 		payload := Payload{
 			Text:      message,
 			Username:  "Hexter Bot",

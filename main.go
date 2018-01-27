@@ -9,9 +9,8 @@ import (
 	"github.com/parnurzeal/gorequest"
 )
 
-// Payload Type is for ...
+// Payload Type is for saving payload as JSON strcture
 type Payload struct {
-	Parse     string `json:"parse,omitempty"`
 	Username  string `json:"username,omitempty"`
 	IconEmoji string `json:"icon_emoji,omitempty"`
 	Channel   string `json:"channel,omitempty"`
@@ -40,13 +39,12 @@ func send(webhookURL string, proxy string, payload Payload) []error {
 }
 
 func main() {
+	webhookURL := "https://hooks.slack.com/services/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"
 	c, err := redis.Dial("tcp", ":6379")
 	if err != nil {
 		panic(err)
 	}
 	defer c.Close()
-
-	webhookURL := "https://hooks.slack.com/services/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"
 
 	for {
 		fmt.Println(">>Please enter some messages for notification Enter it or \"q\" to exit")
@@ -66,6 +64,7 @@ func main() {
 			Text:      message,
 			Username:  "Hexter Bot",
 			IconEmoji: ":hexter_is_ur_daddy:",
+			Channel:   "#studygroup-tw",
 		}
 		sendErr := send(webhookURL, "", payload)
 		if sendErr != nil {

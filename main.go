@@ -1,12 +1,13 @@
 package main
 
 import (
-	"bufio"
+	// "bufio"
 	"fmt"
-	"os"
+	// "os"
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/parnurzeal/gorequest"
+	"github.com/gin-gonic/gin"
 )
 
 // Payload Type is for saving payload as JSON strcture
@@ -38,37 +39,69 @@ func send(webhookURL string, proxy string, payload Payload) []error {
 	return nil
 }
 
+func notificationWorker(webhookURL string, response chan<- []error) {
+	payload := Payload{
+		Text:      ":thinking_face:",
+		Username:  "Hexter Bot",
+		IconEmoji: ":hexter_is_ur_daddy:",
+		Channel:   "#studygroup-tw",
+	}
+	response <- send(webhookURL, "", payload)
+}
+
 func main() {
-	webhookURL := "https://hooks.slack.com/services/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"
 	c, err := redis.Dial("tcp", ":4000")
 	if err != nil {
 		panic(err)
 	}
 	defer c.Close()
 
-	for {
-		fmt.Println(">>Please enter some messages for notification Enter it or \"q\" to exit")
-		bio := bufio.NewReader(os.Stdin)
-		line, _, _ := bio.ReadLine()
 
-		if string(line) == "q" {
-			break
-		}
+	// There code is for console testing
 
-		c.Do("SET", "notification", line)
-		message, err := redis.String(c.Do("GET", "notification"))
+
+	//for {
+	//	fmt.Println(">>Please enter some messages for notification Enter it or \"q\" to exit")
+	//	bio := bufio.NewReader(os.Stdin)
+	//	line, _, _ := bio.ReadLine()
+	//
+	//	if string(line) == "q" {
+	//		break
+	//	}
+	//
+	//	c.Do("SET", "notification", line)
+	//	message, err := redis.String(c.Do("GET", "notification"))
+	//	if err != nil {
+	//		fmt.Println("key not found")
+	//	}
+	//	payload := Payload{
+	//		Text:      message,
+	//		Username:  "Hexter Bot",
+	//		IconEmoji: ":hexter_is_ur_daddy:",
+	//		Channel:   "#studygroup-tw",
+	//	}
+	//	sendErr := send(webhookURL, "", payload)
+	//	if sendErr != nil {
+	//		fmt.Printf("error: %s\n", err)
+	//	}
+	//}
+
+	r := gin.Default()
+	r.GET("/notification", func(c *gin.Context) {
+		webhookURL := "https://hooks.slack.com/services/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"
+		responseChannel := make(chan []error)
+		go notificationWorker(webhookURL, responseChannel)
+		err := <- responseChannel
 		if err != nil {
-			fmt.Println("key not found")
+			c.JSON(400, gin.H{
+				"message": err,
+			})
+		} else {
+			c.JSON(200, gin.H{
+				"message": "Goodjob",
+			})
 		}
-		payload := Payload{
-			Text:      message,
-			Username:  "Hexter Bot",
-			IconEmoji: ":hexter_is_ur_daddy:",
-			Channel:   "#studygroup-tw",
-		}
-		sendErr := send(webhookURL, "", payload)
-		if sendErr != nil {
-			fmt.Printf("error: %s\n", err)
-		}
-	}
+		close(responseChannel)
+	})
+	r.Run() // listen and serve on 0.0.0.0:8080
 }

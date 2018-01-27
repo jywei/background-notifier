@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/garyburd/redigo/redis"
 )
@@ -25,8 +24,7 @@ func main() {
 			break
 		}
 
-		terms := strings.Split(string(line), " ")
-		c.Do("SET", "notification", terms)
+		c.Do("SET", "notification", line)
 		world, err := redis.String(c.Do("GET", "notification"))
 		if err != nil {
 			fmt.Println("key not found")

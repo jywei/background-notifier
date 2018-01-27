@@ -1,0 +1,1 @@
+`echo "port 4000" | redis-server -`

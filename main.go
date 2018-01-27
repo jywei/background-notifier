@@ -40,7 +40,7 @@ func send(webhookURL string, proxy string, payload Payload) []error {
 
 func main() {
 	webhookURL := "https://hooks.slack.com/services/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"
-	c, err := redis.Dial("tcp", ":6379")
+	c, err := redis.Dial("tcp", ":4000")
 	if err != nil {
 		panic(err)
 	}

@@ -1,12 +1,11 @@
 package main
 
-import _ "net/http/pprof"
-
 import (
 	"fmt"
-	"time"
 	"log"
 	"net/http"
+	_ "net/http/pprof"
+	"time"
 
 	"github.com/benmanns/goworker"
 	"github.com/parnurzeal/gorequest"
@@ -70,7 +69,7 @@ func init() {
 		Queues:         []string{"slack"},
 		UseNumber:      true,
 		ExitOnComplete: false,
-		Concurrency:    2,
+		Concurrency:    3,
 		Namespace:      "resque:",
 		Interval:       5.0,
 	}
@@ -79,16 +78,16 @@ func init() {
 }
 
 func main() {
+	errorChannel := make(chan error)
 	go func() {
 		log.Println(http.ListenAndServe("localhost:6060", nil))
 	}()
-	errorChannel := make(chan error)
 	go func() {
 		errorChannel <- goworker.Work()
 	}()
 	if error := <-errorChannel; error != nil {
 		fmt.Println("Error", error)
 	}
-	fmt.Printf("Started on %v", time.Now().Format("2018-01-28 15:54:05"))
 	close(errorChannel)
+	fmt.Printf("Started on %v", time.Now().Format("2018-01-28 15:54:05"))
 }

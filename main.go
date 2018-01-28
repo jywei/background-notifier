@@ -1,8 +1,12 @@
 package main
 
+import _ "net/http/pprof"
+
 import (
 	"fmt"
 	"time"
+	"log"
+	"net/http"
 
 	"github.com/benmanns/goworker"
 	"github.com/parnurzeal/gorequest"
@@ -75,6 +79,9 @@ func init() {
 }
 
 func main() {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 	errorChannel := make(chan error)
 	go func() {
 		errorChannel <- goworker.Work()

@@ -29,7 +29,7 @@ func send(webhookURL string, proxy string, payload Payload) []error {
 		End()
 
 	if err != nil {
-		return err
+		fmt.Println("Error: ", err)
 	}
 	if resp.StatusCode >= 400 {
 		return []error{fmt.Errorf("Error sending msg. Status: %v", resp.Status)}
@@ -74,7 +74,7 @@ func init() {
 
 func main() {
 	if err := goworker.Work(); err != nil {
-		fmt.Println("Error", err)
+		fmt.Println("Error: ", err)
 	}
 	fmt.Printf("Started on %v", time.Now().Format("2006-01-02 15:04:05"))
 }

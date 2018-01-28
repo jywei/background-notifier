@@ -62,7 +62,7 @@ func notificationWorker(queue string, args ...interface{}) error {
 func init() {
 	settings := goworker.WorkerSettings{
 		URI:            "redis://localhost:4000/",
-		Connections:    3,
+		Connections:    10,
 		Queues:         []string{"slack"},
 		UseNumber:      true,
 		ExitOnComplete: false,
@@ -82,6 +82,6 @@ func main() {
 	if error := <-errorChannel; error != nil {
 		fmt.Println("Error", error)
 	}
-	fmt.Printf("Started on %v", time.Now().Format("2006-01-02 15:04:05"))
+	fmt.Printf("Started on %v", time.Now().Format("2018-01-28 15:54:05"))
 	close(errorChannel)
 }

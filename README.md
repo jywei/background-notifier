@@ -6,3 +6,6 @@
 
 # Run the service
 `go run main.go -queues=notifier`
+
+# Read profiling page on local after running the service
+`http://localhost:6060/debug/pprof/`

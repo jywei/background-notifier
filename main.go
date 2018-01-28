@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	_ "net/http/pprof"
 	"time"
 
 	"github.com/benmanns/goworker"
@@ -40,14 +38,6 @@ func send(webhookURL string, proxy string, payload Payload) []error {
 	return nil
 }
 
-func notificationFunc(payload Payload, webhookURL string) []error {
-	err := send(webhookURL, "", payload)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func notificationWorker(queue string, args ...interface{}) error {
 	webhookURL := "https://hooks.slack.com/services/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"
 	message := args[0].(string)
@@ -58,8 +48,11 @@ func notificationWorker(queue string, args ...interface{}) error {
 		Channel:   "#nuclear-testing-sites",
 	}
 	fmt.Printf("Send to %s Platform, message content: %v\n", queue, args)
-	err := notificationFunc(payload, webhookURL)
-	return err[0]
+	err := send(webhookURL, "", payload)
+	if err != nil {
+		return err[0]
+	}
+	return nil
 }
 
 func init() {
@@ -80,7 +73,7 @@ func init() {
 func main() {
 	errorChannel := make(chan error)
 	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
+		http.ListenAndServe("localhost:6060", nil)
 	}()
 	go func() {
 		errorChannel <- goworker.Work()

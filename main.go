@@ -37,13 +37,16 @@ func send(webhookURL string, proxy string, payload Payload) []error {
 	return nil
 }
 
-func notificationFunc(payload Payload, webhookURL string, response chan<- []error) {
-	response <- send(webhookURL, "", payload)
+func notificationFunc(payload Payload, webhookURL string) []error {
+	err := send(webhookURL, "", payload)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func notificationWorker(queue string, args ...interface{}) error {
 	webhookURL := "https://hooks.slack.com/services/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"
-	responseChannel := make(chan []error)
 	message := args[0].(string)
 	payload := Payload{
 		Text:      message,
@@ -51,9 +54,8 @@ func notificationWorker(queue string, args ...interface{}) error {
 		IconEmoji: ":hexter_is_ur_daddy:",
 		Channel:   "#nuclear-testing-sites",
 	}
-	go notificationFunc(payload, webhookURL, responseChannel)
 	fmt.Printf("Send to %s Platform, message content: %v\n", queue, args)
-	err := <-responseChannel
+	err := notificationFunc(payload, webhookURL)
 	return err[0]
 }
 
@@ -73,8 +75,13 @@ func init() {
 }
 
 func main() {
-	if err := goworker.Work(); err != nil {
-		fmt.Println("Error: ", err)
+	errorChannel := make(chan error)
+	go func() {
+		errorChannel <- goworker.Work()
+	}()
+	if error := <-errorChannel; error != nil {
+		fmt.Println("Error", error)
 	}
 	fmt.Printf("Started on %v", time.Now().Format("2006-01-02 15:04:05"))
+	close(errorChannel)
 }
